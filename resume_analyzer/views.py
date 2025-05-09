@@ -157,19 +157,33 @@ def upload_resume(request):
                 'uploaded_at': datetime.datetime.now()
             }).inserted_id
             
-            # Analyze using ATS
+            # Analyze using ATS with detailed error tracking
             try:
+                print("Starting ATS analysis...")
                 ats = ATS()
+                
+                print("Loading resume...")
                 ats.load_resume(resume_content)
+                
+                print("Loading job description...")
                 ats.load_job_description(job_description['content'])
                 
+                print("Extracting experience...")
                 experience = ats.extract_experience()
+                
+                print("Cleaning experience...")
                 ats.clean_experience(experience)
                 
+                print("Extracting skills...")
                 skills = " ".join(ats.extract_skills())
+                
+                print("Cleaning skills...")
                 ats.clean_skills(skills)
                 
+                print("Computing similarity score...")
                 similarity_score = ats.compute_similarity()
+                print(f"Analysis complete. Similarity score: {similarity_score}")
+                
             except Exception as ats_error:
                 print(f"ATS Analysis error: {str(ats_error)}")
                 messages.error(request, f"Error during resume analysis: {str(ats_error)}")
