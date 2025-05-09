@@ -1,0 +1,12 @@
+{% extends 'resume_analyzer/base.html' %}
+
+{% block content %}
+<div class="alert alert-danger">
+    <h4 class="alert-heading">Error!</h4>
+    <p>{{ error_message }}</p>
+</div>
+<div class="mt-4">
+    <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
+    <a href="{% url 'upload_resume' %}" class="btn btn-outline-primary ms-2">Upload Resume Again</a>
+</div>
+{% endblock %}

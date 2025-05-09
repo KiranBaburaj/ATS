@@ -1,0 +1,11 @@
+{% extends 'resume_analyzer/base.html' %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="mb-4">Resume Analyzer</h1>
+    <p class="lead">Upload your resume and job description to see how well they match.</p>
+    <div class="mt-5">
+        <a href="{% url 'upload_resume' %}" class="btn btn-primary btn-lg">Get Started</a>
+    </div>
+</div>
+{% endblock %}

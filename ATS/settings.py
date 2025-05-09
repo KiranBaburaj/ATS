@@ -28,6 +28,13 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+import pymongo
+
+CONNECTION = pymongo.MongoClient('mongodb+srv://ia:GLG3RcKzMkWEd6fF@ia-base.cvprl.mongodb.net/?retryWrites=true&w=majority')
+# CONNECTION = pymongo.MongoClient('mongodb://localhost:27017')
+
+DB = CONNECTION.ATS
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -36,7 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
+    "django.contrib.staticfiles", "resume_analyzer", 
 ]
 
 MIDDLEWARE = [
@@ -54,7 +61,7 @@ ROOT_URLCONF = "ATS.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / 'ATS' / 'templates' ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -69,6 +76,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "ATS.wsgi.application"
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

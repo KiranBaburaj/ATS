@@ -1,0 +1,17 @@
+{% extends 'resume_analyzer/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Enter Job Description</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="job_title" class="form-label">Job Title</label>
+        <input type="text" class="form-control" id="job_title" name="job_title" required>
+    </div>
+    <div class="mb-3">
+        <label for="job_description" class="form-label">Job Description</label>
+        <textarea class="form-control" id="job_description" name="job_description" rows="10" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Analyze</button>
+</form>
+{% endblock %}
