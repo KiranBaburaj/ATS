@@ -1,28 +1,346 @@
 {% extends 'resume_analyzer/base.html' %}
 
 {% block content %}
+<!-- Advanced React-Inspired UI Styles with Dark Theme -->
+<style>
+    /* CSS Variables for Responsive Design with Dark Theme */
+    :root {
+        --card-border-radius: 12px;
+        --transition-bezier: cubic-bezier(0.25, 0.8, 0.25, 1);
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4);
+        --shadow-md: 0 4px 6px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+        --shadow-lg: 0 15px 35px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.4);
+        --shadow-hover: 0 14px 28px rgba(0,0,0,0.5), 0 10px 10px rgba(0,0,0,0.4);
+        
+        /* Dark theme colors */
+        --bg-dark: #121212;
+        --bg-card: #1e1e1e;
+        --bg-card-hover: #252525;
+        --text-primary: #ffffff;
+        --text-secondary: #b3b3b3;
+        --text-muted: #8c8c8c;
+        --border-color: #333333;
+        --primary-gradient-start: #4361ee;
+        --primary-gradient-end: #4cc9f0;
+    }
+    
+    /* Override base styles for dark theme */
+    body {
+        background-color: var(--bg-dark);
+        color: var(--text-primary);
+    }
+    
+    /* Screen Size Optimizations */
+    @media (min-width: 1920px) { /* FHD Screens */
+        .container {
+            max-width: 1600px;
+        }
+        .hero-title {
+            font-size: 3.5rem;
+        }
+        .hero-subtitle {
+            font-size: 1.5rem;
+        }
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+        }
+    }
+    
+    @media (max-width: 1366px) { /* HD Screens */
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+        .section-spacing {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+        }
+    }
+    
+    /* React-Inspired Animation Keyframes */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translate3d(0, 40px, 0); }
+        to { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translate3d(40px, 0, 0); }
+        to { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translate3d(-40px, 0, 0); }
+        to { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale3d(0.95, 0.95, 1); }
+        to { opacity: 1; transform: scale3d(1, 1, 1); }
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale3d(1, 1, 1); }
+        50% { transform: scale3d(1.05, 1.05, 1); }
+        100% { transform: scale3d(1, 1, 1); }
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    @keyframes borderPulse {
+        0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(67, 97, 238, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+    }
+    
+    /* React-Inspired Animation Classes */
+    .fade-in-up {
+        opacity: 0;
+        will-change: transform, opacity;
+        animation: fadeInUp 0.7s var(--transition-bezier) forwards;
+        backface-visibility: hidden;
+    }
+    
+    .slide-in-right {
+        opacity: 0;
+        will-change: transform, opacity;
+        animation: slideInRight 0.7s var(--transition-bezier) forwards;
+        backface-visibility: hidden;
+    }
+    
+    .slide-in-left {
+        opacity: 0;
+        will-change: transform, opacity;
+        animation: slideInLeft 0.7s var(--transition-bezier) forwards;
+        backface-visibility: hidden;
+    }
+    
+    .scale-in {
+        opacity: 0;
+        will-change: transform, opacity;
+        animation: scaleIn 0.5s var(--transition-bezier) forwards;
+        backface-visibility: hidden;
+    }
+    
+    /* Modern Card Styles - Dark Theme */
+    .react-card {
+        border: none;
+        border-radius: var(--card-border-radius);
+        transition: all 0.3s var(--transition-bezier);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        will-change: transform, box-shadow;
+        background: var(--bg-card);
+        color: var(--text-primary);
+    }
+    
+    .react-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        box-shadow: var(--shadow-hover);
+        background: var(--bg-card-hover);
+    }
+    
+    /* Modern Button Styles */
+    .btn-react {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s var(--transition-bezier);
+        box-shadow: var(--shadow-sm);
+        border-radius: 8px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        padding: 0.6rem 1.2rem;
+        z-index: 1;
+        will-change: transform, box-shadow;
+    }
+    
+    .btn-react:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: all 0.6s;
+        z-index: -1;
+    }
+    
+    .btn-react:hover:before {
+        left: 100%;
+    }
+    
+    .btn-react:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .btn-react:active {
+        transform: translateY(1px);
+    }
+    
+    /* Modern Icon Animations */
+    .icon-pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    .icon-float {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .icon-border-pulse {
+        animation: borderPulse 2s infinite;
+    }
+    
+    /* Staggered Animation Delays */
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    
+    /* Modern Text Effects */
+    .gradient-text {
+        background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+    
+    .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    /* Shimmer Effect */
+    .shimmer {
+        background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.2), rgba(255,255,255,0));
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    /* Modern List Items - Dark Theme */
+    .react-list-item {
+        transition: all 0.3s var(--transition-bezier);
+        border-radius: 8px;
+        padding: 0.7rem;
+        margin-bottom: 0.5rem;
+        will-change: transform, background-color;
+        background-color: transparent;
+        color: var(--text-primary);
+    }
+    
+    .react-list-item:hover {
+        background-color: rgba(67, 97, 238, 0.15);
+        transform: translateX(5px);
+    }
+    
+    /* Modern Image Effects */
+    .image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .image-container img {
+        transition: transform 0.5s var(--transition-bezier);
+        will-change: transform;
+    }
+    
+    .image-container:hover img {
+        transform: scale(1.05);
+    }
+    
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+    }
+    
+    /* Section Spacing */
+    .section-spacing {
+        margin-top: 4rem;
+        padding-top: 2rem;
+    }
+    
+    /* Feature Icon Container - Dark Theme */
+    .feature-icon {
+        width: 54px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(67, 97, 238, 0.2), rgba(76, 201, 240, 0.2));
+        margin-bottom: 1rem;
+        transition: all 0.3s var(--transition-bezier);
+    }
+    
+    .feature-icon i {
+        font-size: 1.5rem;
+        background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Dark theme specific overrides */
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+    
+    .bg-light {
+        background-color: #252525 !important;
+    }
+    
+    .list-group-item {
+        background-color: transparent;
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .card-header.bg-light {
+        color: var(--text-primary);
+    }
+</style>
+
 <!-- Hero Section -->
 <div class="row align-items-center">
     <div class="col-lg-6 mb-3 mb-lg-0">
-        <h1 class="display-5 fw-bold mb-2">The Interview Intelligence Engine</h1>
-        <p class="lead mb-3">Sharpen your hiring decisions and prevent costly hiring mistakes with our AI-powered interview platform.</p>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{% url 'manage_job_descriptions' %}" class="btn btn-primary">
+        <h1 class="display-5 fw-bold mb-3 fade-in-up hero-title">The <span class="gradient-text text-shadow">Interview Intelligence</span> Engine</h1>
+        <p class="lead mb-4 fade-in-up delay-1 hero-subtitle">Sharpen your hiring decisions and prevent costly hiring mistakes with our AI-powered interview platform.</p>
+        <div class="d-flex flex-wrap gap-3 fade-in-up delay-2">
+            <a href="{% url 'manage_job_descriptions' %}" class="btn btn-primary btn-react">
                 <i class="fas fa-briefcase me-2"></i>Create Job Description
             </a>
-            <a href="{% url 'upload_resume' %}" class="btn btn-success">
+            <a href="{% url 'upload_resume' %}" class="btn btn-success btn-react">
                 <i class="fas fa-file-upload me-2"></i>Analyze Resume
             </a>
-            <a href="#" class="btn btn-outline-primary">
+            <a href="#" class="btn btn-outline-primary btn-react">
                 <i class="fas fa-calendar-check me-2"></i>Schedule Interview
             </a>
         </div>
         
-        <div class="mt-4">
+        <div class="mt-4 fade-in-up delay-3">
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-2">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-2 icon-float">
                             <i class="fas fa-bolt text-primary"></i>
                         </div>
                         <div>
@@ -33,7 +351,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-2">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-2 icon-float" style="animation-delay: 0.2s">
                             <i class="fas fa-chart-line text-primary"></i>
                         </div>
                         <div>
@@ -44,7 +362,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-2">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-2 icon-float" style="animation-delay: 0.4s">
                             <i class="fas fa-user-check text-primary"></i>
                         </div>
                         <div>
@@ -57,65 +375,64 @@
         </div>
     </div>
     
-    <div class="col-lg-6">
-        <div class="card border-0 shadow">
-            <div class="card-body p-0">
-                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="img-fluid rounded" alt="Interview Platform">
-            </div>
+    <div class="col-lg-6 slide-in-right">
+        <div class="image-container">
+            <div class="image-overlay"></div>
+            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="img-fluid" alt="Interview Platform">
         </div>
     </div>
 </div>
 
 <!-- Features Section -->
-<div class="row mt-4 pt-3">
-    <div class="col-12 text-center mb-3">
-        <h3 class="fw-bold">Transform Your Hiring Process</h3>
+<div class="row section-spacing">
+    <div class="col-12 text-center mb-4 fade-in-up">
+        <h2 class="fw-bold mb-2">Transform Your <span class="gradient-text">Hiring Process</span></h2>
         <p class="text-muted">From resume screening to structured interviews</p>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card feature-card h-100">
-            <div class="card-body p-3">
-                <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-inline-flex mb-2" style="width: 48px; height: 48px;">
-                    <i class="fas fa-file-alt text-primary m-auto"></i>
+    <div class="col-md-3 mb-4 scale-in delay-1">
+        <div class="react-card h-100">
+            <div class="card-body p-4">
+                <div class="feature-icon mx-auto icon-border-pulse">
+                    <i class="fas fa-file-alt"></i>
                 </div>
-                <h5>Resume Analysis</h5>
+                <h5 class="text-center mb-3">Resume Analysis</h5>
                 <p class="text-muted small mb-0">AI-powered resume screening to match candidates with job descriptions.</p>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card feature-card h-100">
-            <div class="card-body p-3">
-                <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-inline-flex mb-2" style="width: 48px; height: 48px;">
-                    <i class="fas fa-comments text-primary m-auto"></i>
+    <div class="col-md-3 mb-4 scale-in delay-2">
+        <div class="react-card h-100">
+            <div class="card-body p-4">
+                <div class="feature-icon mx-auto icon-border-pulse">
+                    <i class="fas fa-comments"></i>
                 </div>
-                <h5>Structured Interviews</h5>
+                <h5 class="text-center mb-3">Structured Interviews</h5>
                 <p class="text-muted small mb-0">Plan interview rounds with consistent and fair questions for every candidate.</p>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card feature-card h-100">
-            <div class="card-body p-3">
-                <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-inline-flex mb-2" style="width: 48px; height: 48px;">
-                    <i class="fas fa-robot text-primary m-auto"></i>
+    <div class="col-md-3 mb-4 scale-in delay-3">
+        <div class="react-card h-100">
+            <div class="card-body p-4">
+                <div class="feature-icon mx-auto icon-border-pulse">
+                    <i class="fas fa-robot"></i>
                 </div>
-                <h5>AI Note Taking</h5>
+                <h5 class="text-center mb-3">AI Note Taking</h5>
                 <p class="text-muted small mb-0">Automatic interview notes and feedback generation for thorough documentation.</p>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card feature-card h-100">
-            <div class="card-body p-3">
-                <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-inline-flex mb-2" style="width: 48px; height: 48px;">
-                    <i class="fas fa-chart-pie text-primary m-auto"></i>
+    <div class="col-md-3 mb-4 scale-in delay-4">
+        <div class="react-card h-100">
+            <div class="card-body p-4">
+                <div class="feature-icon mx-auto icon-border-pulse">
+                    <i class="fas fa-chart-pie"></i>
                 </div>
-                <h5>Hiring Analytics</h5>
+                <h5 class="text-center mb-3">Hiring Analytics</h5>
                 <p class="text-muted small mb-0">Track candidate pulse and get insights throughout the hiring process.</p>
             </div>
         </div>
@@ -123,43 +440,43 @@
 </div>
 
 <!-- Solutions by Role Section -->
-<div class="row mt-4 pt-3">
-    <div class="col-12 text-center mb-3">
-        <h3 class="fw-bold">Solutions by Role</h3>
+<div class="row section-spacing">
+    <div class="col-12 text-center mb-4 fade-in-up">
+        <h2 class="fw-bold mb-2">Solutions by <span class="gradient-text">Role</span></h2>
         <p class="text-muted">Empowering your entire hiring organization</p>
     </div>
     
-    <div class="col-md-4 mb-3">
-        <div class="card solution-card">
-            <div class="card-body text-center p-3">
-                <div class="solution-icon bg-primary bg-opacity-10 mx-auto">
-                    <i class="fas fa-user-tie text-primary"></i>
+    <div class="col-md-4 mb-4 slide-in-left delay-1">
+        <div class="react-card h-100">
+            <div class="card-body p-4 text-center">
+                <div class="feature-icon mx-auto icon-float">
+                    <i class="fas fa-user-tie"></i>
                 </div>
-                <h5>For Interviewers</h5>
+                <h5 class="mb-3">For Interviewers</h5>
                 <p class="text-muted small mb-0">Smart feature-loaded sidekick to help conduct better interviews with less effort.</p>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4 mb-3">
-        <div class="card solution-card">
-            <div class="card-body text-center p-3">
-                <div class="solution-icon bg-primary bg-opacity-10 mx-auto">
-                    <i class="fas fa-users-cog text-primary"></i>
+    <div class="col-md-4 mb-4 fade-in-up delay-2">
+        <div class="react-card h-100">
+            <div class="card-body p-4 text-center">
+                <div class="feature-icon mx-auto icon-float" style="animation-delay: 0.2s">
+                    <i class="fas fa-users-cog"></i>
                 </div>
-                <h5>For Hiring Managers</h5>
+                <h5 class="mb-3">For Hiring Managers</h5>
                 <p class="text-muted small mb-0">Make data-driven hiring decisions with comprehensive candidate insights.</p>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4 mb-3">
-        <div class="card solution-card">
-            <div class="card-body text-center p-3">
-                <div class="solution-icon bg-primary bg-opacity-10 mx-auto">
-                    <i class="fas fa-user-friends text-primary"></i>
+    <div class="col-md-4 mb-4 slide-in-right delay-1">
+        <div class="react-card h-100">
+            <div class="card-body p-4 text-center">
+                <div class="feature-icon mx-auto icon-float" style="animation-delay: 0.4s">
+                    <i class="fas fa-user-friends"></i>
                 </div>
-                <h5>For HR Leaders</h5>
+                <h5 class="mb-3">For HR Leaders</h5>
                 <p class="text-muted small mb-0">Gain transparency and insights to build thriving teams and great processes.</p>
             </div>
         </div>
@@ -167,42 +484,98 @@
 </div>
 
 <!-- Before/After Section -->
-<div class="row mt-4 pt-3">
-    <div class="col-12 text-center mb-3">
-        <h3 class="fw-bold">The ATS Difference</h3>
+<div class="row section-spacing">
+    <div class="col-12 text-center mb-4 fade-in-up">
+        <h2 class="fw-bold mb-2">The <span class="gradient-text">ATS Difference</span></h2>
         <p class="text-muted">See how we transform your hiring process</p>
     </div>
     
-    <div class="col-md-6 mb-3">
-        <div class="card h-100 bg-light">
-            <div class="card-header bg-light text-center">
+    <div class="col-md-6 mb-4 slide-in-left">
+        <div class="react-card h-100 bg-light">
+            <div class="card-header bg-light text-center py-3">
                 <h5 class="mb-0">Before ATS</h5>
             </div>
-            <div class="card-body p-3">
+            <div class="card-body p-4">
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item bg-transparent"><i class="fas fa-times-circle text-danger me-2"></i> Repetitive, unstructured interview flow</li>
-                    <li class="list-group-item bg-transparent"><i class="fas fa-times-circle text-danger me-2"></i> Manually filled feedback with delays</li>
-                    <li class="list-group-item bg-transparent"><i class="fas fa-times-circle text-danger me-2"></i> Longer process with less data</li>
-                    <li class="list-group-item bg-transparent"><i class="fas fa-times-circle text-danger me-2"></i> Difficult to track candidate experience</li>
+                    <li class="list-group-item bg-transparent react-list-item"><i class="fas fa-times-circle text-danger me-2"></i> Repetitive, unstructured interview flow</li>
+                    <li class="list-group-item bg-transparent react-list-item"><i class="fas fa-times-circle text-danger me-2"></i> Manually filled feedback with delays</li>
+                    <li class="list-group-item bg-transparent react-list-item"><i class="fas fa-times-circle text-danger me-2"></i> Longer process with less data</li>
+                    <li class="list-group-item bg-transparent react-list-item"><i class="fas fa-times-circle text-danger me-2"></i> Difficult to track candidate experience</li>
                 </ul>
             </div>
         </div>
     </div>
     
-    <div class="col-md-6 mb-3">
-        <div class="card h-100 border-primary">
-            <div class="card-header bg-primary text-white text-center">
+    <div class="col-md-6 mb-4 slide-in-right">
+        <div class="react-card h-100 border-primary">
+            <div class="card-header bg-primary text-white text-center py-3">
                 <h5 class="mb-0">With ATS</h5>
             </div>
-            <div class="card-body p-3">
+            <div class="card-body p-4">
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Structured, consistent and objective conversations</li>
-                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> AI-enabled prompt feedback with minimal effort</li>
-                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Faster process with significantly more data</li>
-                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Candidate pulse insights throughout the process</li>
+                    <li class="list-group-item bg-transparent react-list-item"><i class="fas fa-check-circle text-success me-2"></i> Structured, consistent and objective conversations</li>
+                    <li class="list-group-item bg-transparent react-list-item"><i class="fas fa-check-circle text-success me-2"></i> AI-enabled prompt feedback with minimal effort</li>
+                    <li class="list-group-item bg-transparent react-list-item"><i class="fas fa-check-circle text-success me-2"></i> Faster process with significantly more data</li>
+                    <li class="list-group-item bg-transparent react-list-item"><i class="fas fa-check-circle text-success me-2"></i> Candidate pulse insights throughout the process</li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Initialize Advanced Animations -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // IntersectionObserver for modern scroll-based animations
+        const animatedElements = document.querySelectorAll('.fade-in-up, .slide-in-right, .slide-in-left, .scale-in');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            root: null,
+            threshold: 0.1,
+            rootMargin: '0px 0px -10% 0px'
+        });
+        
+        // Set initial state and observe elements
+        animatedElements.forEach(element => {
+            element.style.animationPlayState = 'paused';
+            observer.observe(element);
+        });
+        
+        // Add smooth scroll behavior for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Add parallax effect to hero image
+        const heroImage = document.querySelector('.image-container img');
+        if (heroImage) {
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.pageYOffset;
+                heroImage.style.transform = `translateY(${scrollPosition * 0.05}px)`;
+            });
+        }
+        
+        // Apply dark theme to body
+        document.body.style.backgroundColor = 'var(--bg-dark)';
+        document.body.style.color = 'var(--text-primary)';
+    });
+</script>
 {% endblock %}
