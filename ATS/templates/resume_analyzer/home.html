@@ -3,9 +3,10 @@
 {% block content %}
 <div class="text-center">
     <h1 class="mb-4">Resume Analyzer</h1>
-    <p class="lead">Upload your resume and job description to see how well they match.</p>
+    <p class="lead">Manage your job descriptions and analyze resumes to find the best candidates.</p>
     <div class="mt-5">
-        <a href="{% url 'upload_resume' %}" class="btn btn-primary btn-lg">Get Started</a>
+        <a href="{% url 'manage_job_descriptions' %}" class="btn btn-primary btn-lg me-2">Manage Job Descriptions</a>
+        <a href="{% url 'upload_resume' %}" class="btn btn-success btn-lg">Upload Resume</a>
     </div>
 </div>
 {% endblock %}
