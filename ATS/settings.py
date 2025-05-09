@@ -61,7 +61,7 @@ ROOT_URLCONF = "ATS.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'ATS' / 'templates' ],
+        "DIRS": [BASE_DIR / 'templates' ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
