@@ -1,16 +1,20 @@
 {% extends 'resume_analyzer/base.html' %}
 
 {% block content %}
+<!-- Hero Section -->
 <div class="row align-items-center">
     <div class="col-lg-6 mb-3 mb-lg-0">
-        <h1 class="display-5 fw-bold mb-2">AI-Powered Resume Analysis</h1>
-        <p class="lead mb-3">Streamline your hiring process with our advanced resume analyzer. Match candidates to job descriptions with precision and efficiency.</p>
+        <h1 class="display-5 fw-bold mb-2">The Interview Intelligence Engine</h1>
+        <p class="lead mb-3">Sharpen your hiring decisions and prevent costly hiring mistakes with our AI-powered interview platform.</p>
         <div class="d-flex flex-wrap gap-2">
             <a href="{% url 'manage_job_descriptions' %}" class="btn btn-primary">
-                <i class="fas fa-briefcase me-2"></i>Manage Job Descriptions
+                <i class="fas fa-briefcase me-2"></i>Create Job Description
             </a>
             <a href="{% url 'upload_resume' %}" class="btn btn-success">
                 <i class="fas fa-file-upload me-2"></i>Analyze Resume
+            </a>
+            <a href="#" class="btn btn-outline-primary">
+                <i class="fas fa-calendar-check me-2"></i>Schedule Interview
             </a>
         </div>
         
@@ -22,8 +26,8 @@
                             <i class="fas fa-bolt text-primary"></i>
                         </div>
                         <div>
-                            <h6 class="mb-0">Fast Analysis</h6>
-                            <small class="text-muted">Results in seconds</small>
+                            <h6 class="mb-0">Fewer Interviews</h6>
+                            <small class="text-muted">Save hours of time</small>
                         </div>
                     </div>
                 </div>
@@ -33,19 +37,19 @@
                             <i class="fas fa-chart-line text-primary"></i>
                         </div>
                         <div>
-                            <h6 class="mb-0">Accurate</h6>
-                            <small class="text-muted">AI-powered matching</small>
+                            <h6 class="mb-0">Better Decisions</h6>
+                            <small class="text-muted">AI-powered insights</small>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="d-flex align-items-center">
                         <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-2">
-                            <i class="fas fa-shield-alt text-primary"></i>
+                            <i class="fas fa-user-check text-primary"></i>
                         </div>
                         <div>
-                            <h6 class="mb-0">Secure</h6>
-                            <small class="text-muted">Private data handling</small>
+                            <h6 class="mb-0">Great Experience</h6>
+                            <small class="text-muted">For candidates & teams</small>
                         </div>
                     </div>
                 </div>
@@ -56,50 +60,147 @@
     <div class="col-lg-6">
         <div class="card border-0 shadow">
             <div class="card-body p-0">
-                <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cmVzdW1lfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60" class="img-fluid rounded" alt="Resume Analysis">
+                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="img-fluid rounded" alt="Interview Platform">
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-4 pt-4">
+<!-- Features Section -->
+<div class="row mt-4 pt-3">
     <div class="col-12 text-center mb-3">
-        <h3 class="fw-bold">How It Works</h3>
-        <p class="text-muted">Three simple steps to find the perfect match</p>
+        <h3 class="fw-bold">Transform Your Hiring Process</h3>
+        <p class="text-muted">From resume screening to structured interviews</p>
     </div>
     
-    <div class="col-md-4 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center p-3">
+    <div class="col-md-3 mb-3">
+        <div class="card feature-card h-100">
+            <div class="card-body p-3">
                 <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-inline-flex mb-2" style="width: 48px; height: 48px;">
-                    <i class="fas fa-briefcase text-primary m-auto"></i>
+                    <i class="fas fa-file-alt text-primary m-auto"></i>
                 </div>
-                <h5>1. Add Job Descriptions</h5>
-                <p class="text-muted small mb-0">Create and manage your job descriptions with detailed requirements.</p>
+                <h5>Resume Analysis</h5>
+                <p class="text-muted small mb-0">AI-powered resume screening to match candidates with job descriptions.</p>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center p-3">
+    <div class="col-md-3 mb-3">
+        <div class="card feature-card h-100">
+            <div class="card-body p-3">
                 <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-inline-flex mb-2" style="width: 48px; height: 48px;">
-                    <i class="fas fa-file-upload text-primary m-auto"></i>
+                    <i class="fas fa-comments text-primary m-auto"></i>
                 </div>
-                <h5>2. Upload Resumes</h5>
-                <p class="text-muted small mb-0">Upload candidate resumes in PDF or text format for analysis.</p>
+                <h5>Structured Interviews</h5>
+                <p class="text-muted small mb-0">Plan interview rounds with consistent and fair questions for every candidate.</p>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center p-3">
+    <div class="col-md-3 mb-3">
+        <div class="card feature-card h-100">
+            <div class="card-body p-3">
+                <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-inline-flex mb-2" style="width: 48px; height: 48px;">
+                    <i class="fas fa-robot text-primary m-auto"></i>
+                </div>
+                <h5>AI Note Taking</h5>
+                <p class="text-muted small mb-0">Automatic interview notes and feedback generation for thorough documentation.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card feature-card h-100">
+            <div class="card-body p-3">
                 <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-inline-flex mb-2" style="width: 48px; height: 48px;">
                     <i class="fas fa-chart-pie text-primary m-auto"></i>
                 </div>
-                <h5>3. Review Analysis</h5>
-                <p class="text-muted small mb-0">Get detailed match scores, skills assessment, and experience analysis.</p>
+                <h5>Hiring Analytics</h5>
+                <p class="text-muted small mb-0">Track candidate pulse and get insights throughout the hiring process.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Solutions by Role Section -->
+<div class="row mt-4 pt-3">
+    <div class="col-12 text-center mb-3">
+        <h3 class="fw-bold">Solutions by Role</h3>
+        <p class="text-muted">Empowering your entire hiring organization</p>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card solution-card">
+            <div class="card-body text-center p-3">
+                <div class="solution-icon bg-primary bg-opacity-10 mx-auto">
+                    <i class="fas fa-user-tie text-primary"></i>
+                </div>
+                <h5>For Interviewers</h5>
+                <p class="text-muted small mb-0">Smart feature-loaded sidekick to help conduct better interviews with less effort.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card solution-card">
+            <div class="card-body text-center p-3">
+                <div class="solution-icon bg-primary bg-opacity-10 mx-auto">
+                    <i class="fas fa-users-cog text-primary"></i>
+                </div>
+                <h5>For Hiring Managers</h5>
+                <p class="text-muted small mb-0">Make data-driven hiring decisions with comprehensive candidate insights.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card solution-card">
+            <div class="card-body text-center p-3">
+                <div class="solution-icon bg-primary bg-opacity-10 mx-auto">
+                    <i class="fas fa-user-friends text-primary"></i>
+                </div>
+                <h5>For HR Leaders</h5>
+                <p class="text-muted small mb-0">Gain transparency and insights to build thriving teams and great processes.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Before/After Section -->
+<div class="row mt-4 pt-3">
+    <div class="col-12 text-center mb-3">
+        <h3 class="fw-bold">The ATS Difference</h3>
+        <p class="text-muted">See how we transform your hiring process</p>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+        <div class="card h-100 bg-light">
+            <div class="card-header bg-light text-center">
+                <h5 class="mb-0">Before ATS</h5>
+            </div>
+            <div class="card-body p-3">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item bg-transparent"><i class="fas fa-times-circle text-danger me-2"></i> Repetitive, unstructured interview flow</li>
+                    <li class="list-group-item bg-transparent"><i class="fas fa-times-circle text-danger me-2"></i> Manually filled feedback with delays</li>
+                    <li class="list-group-item bg-transparent"><i class="fas fa-times-circle text-danger me-2"></i> Longer process with less data</li>
+                    <li class="list-group-item bg-transparent"><i class="fas fa-times-circle text-danger me-2"></i> Difficult to track candidate experience</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+        <div class="card h-100 border-primary">
+            <div class="card-header bg-primary text-white text-center">
+                <h5 class="mb-0">With ATS</h5>
+            </div>
+            <div class="card-body p-3">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Structured, consistent and objective conversations</li>
+                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> AI-enabled prompt feedback with minimal effort</li>
+                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Faster process with significantly more data</li>
+                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Candidate pulse insights throughout the process</li>
+                </ul>
             </div>
         </div>
     </div>
