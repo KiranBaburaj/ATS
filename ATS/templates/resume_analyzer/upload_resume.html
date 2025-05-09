@@ -1,29 +1,48 @@
 {% extends 'resume_analyzer/base.html' %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">Upload Resume</h1>
-    
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        
-        <div class="mb-3">
-            <label for="job_description" class="form-label">Select Job Description</label>
-            <select class="form-select" id="job_description" name="job_description" required>
-                <option value="">-- Select a Job Description --</option>
-                {% for jd in job_descriptions %}
-                    <option value="{{ jd.id }}">{{ jd.title }}</option>
-                {% endfor %}
-            </select>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title h3 mb-3">Upload Resume</h2>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="job_description" class="form-label fw-medium">Select Job Description</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-briefcase"></i></span>
+                            <select class="form-select" id="job_description" name="job_description" required>
+                                <option value="">-- Select a Job Description --</option>
+                                {% for jd in job_descriptions %}
+                                    <option value="{{ jd.id }}">{{ jd.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="resume_file" class="form-label fw-medium">Upload Resume</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-file-upload"></i></span>
+                            <input class="form-control" type="file" id="resume_file" name="resume_file" accept=".pdf,.txt,.docx" required>
+                        </div>
+                        <div class="form-text">Accepted formats: PDF, TXT, DOCX</div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Analyze Resume
+                        </button>
+                        <a href="{% url 'manage_job_descriptions' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i>Manage Job Descriptions
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
-        
-        <div class="mb-3">
-            <label for="resume_file" class="form-label">Upload Resume (PDF or text file)</label>
-            <input class="form-control" type="file" id="resume_file" name="resume_file" accept=".pdf,.txt,.docx" required>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Analyze Resume</button>
-        <a href="{% url 'manage_job_descriptions' %}" class="btn btn-outline-secondary">Manage Job Descriptions</a>
-    </form>
+    </div>
 </div>
 {% endblock %}

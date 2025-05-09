@@ -1,57 +1,101 @@
 {% extends 'resume_analyzer/base.html' %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">Manage Job Descriptions</h1>
-    
-    <!-- Add New Job Description Form -->
-    <div class="card mb-4" id="jobDescriptionForm">
-        <div class="card-header">
-            <h5 id="formTitle">Add New Job Description</h5>
-        </div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" id="edit_id" name="edit_id" value="">
-                <div class="mb-3">
-                    <label for="job_title" class="form-label">Job Title</label>
-                    <input type="text" class="form-control" id="job_title" name="job_title" required>
-                </div>
-                <div class="mb-3">
-                    <label for="job_description" class="form-label">Job Description</label>
-                    <textarea class="form-control" id="job_description" name="job_description" rows="6" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary" id="submitBtn">Save Job Description</button>
-                <button type="button" class="btn btn-secondary d-none" id="cancelBtn" onclick="cancelEdit()">Cancel</button>
-            </form>
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold mb-3">Manage Job Descriptions</h1>
+        <p class="lead text-muted">Create, edit and manage your job descriptions for resume analysis</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-5 mb-4">
+        <!-- Add New Job Description Form -->
+        <div class="card shadow-sm mb-4" id="jobDescriptionForm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0" id="formTitle"><i class="fas fa-plus-circle me-2 text-primary"></i>Add New Job Description</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_id" name="edit_id" value="">
+                    <div class="mb-3">
+                        <label for="job_title" class="form-label fw-medium">Job Title</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-briefcase text-primary"></i></span>
+                            <input type="text" class="form-control" id="job_title" name="job_title" placeholder="e.g. Software Engineer" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="job_description" class="form-label fw-medium">Job Description</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-file-alt text-primary"></i></span>
+                            <textarea class="form-control" id="job_description" name="job_description" rows="8" placeholder="Enter detailed job requirements, responsibilities, and qualifications..." required></textarea>
+                        </div>
+                        <div class="form-text">Include skills, experience requirements, and responsibilities for better matching.</div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+                            <i class="fas fa-save me-2"></i>Save Job Description
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary d-none" id="cancelBtn" onclick="cancelEdit()">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     
-    <!-- List of Existing Job Descriptions -->
-    <h2 class="mb-3">Existing Job Descriptions</h2>
-    {% if job_descriptions %}
-        <div class="list-group">
-            {% for jd in job_descriptions %}
-                <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ jd.title }}</h5>
-                        <small>{{ jd.created_at|date:"F d, Y" }}</small>
+    <div class="col-lg-7">
+        <!-- List of Existing Job Descriptions -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="fas fa-list me-2 text-primary"></i>Existing Job Descriptions</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if job_descriptions %}
+                    <div class="list-group list-group-flush">
+                        {% for jd in job_descriptions %}
+                            <div class="list-group-item p-4 border-bottom">
+                                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0 fw-bold">{{ jd.title }}</h5>
+                                    <span class="badge bg-light text-dark rounded-pill">
+                                        <i class="far fa-calendar-alt me-1"></i>{{ jd.created_at|date:"F d, Y" }}
+                                    </span>
+                                </div>
+                                <p class="mb-3 text-muted">{{ jd.content|truncatechars:200 }}</p>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editJobDescription('{{ jd.id }}', '{{ jd.title|escapejs }}', '{{ jd.content|escapejs }}')">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </button>
+                                    <a href="{% url 'delete_job_description' jd_id=jd.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this job description?');">
+                                        <i class="fas fa-trash-alt me-1"></i>Delete
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                    <p class="mb-1">{{ jd.content|truncatechars:200 }}</p>
-                    <div class="mt-2">
-                        <button class="btn btn-sm btn-primary" onclick="editJobDescription('{{ jd.id }}', '{{ jd.title|escapejs }}', '{{ jd.content|escapejs }}')">Edit</button>
-                        <a href="{% url 'delete_job_description' jd_id=jd.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this job description?');">Delete</a>
+                {% else %}
+                    <div class="p-4 text-center">
+                        <div class="py-5">
+                            <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
+                            <h5>No Job Descriptions Available</h5>
+                            <p class="text-muted">Add your first job description using the form.</p>
+                        </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% endif %}
+            </div>
         </div>
-    {% else %}
-        <div class="alert alert-info">No job descriptions available. Add your first job description above.</div>
-    {% endif %}
-    
-    <div class="mt-4">
-        <a href="{% url 'upload_resume' %}" class="btn btn-success">Upload Resume</a>
-        <a href="{% url 'home' %}" class="btn btn-outline-secondary">Back to Home</a>
+        
+        <div class="mt-4 d-flex gap-2">
+            <a href="{% url 'upload_resume' %}" class="btn btn-success">
+                <i class="fas fa-file-upload me-2"></i>Upload Resume
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-home me-2"></i>Back to Home
+            </a>
+        </div>
     </div>
 </div>
 
@@ -60,8 +104,8 @@ function editJobDescription(id, title, content) {
     document.getElementById('edit_id').value = id;
     document.getElementById('job_title').value = title;
     document.getElementById('job_description').value = content;
-    document.getElementById('formTitle').textContent = 'Edit Job Description';
-    document.getElementById('submitBtn').textContent = 'Update Job Description';
+    document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit me-2 text-primary"></i>Edit Job Description';
+    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save me-2"></i>Update Job Description';
     document.getElementById('cancelBtn').classList.remove('d-none');
     document.getElementById('jobDescriptionForm').scrollIntoView({ behavior: 'smooth' });
 }
@@ -70,8 +114,8 @@ function cancelEdit() {
     document.getElementById('edit_id').value = '';
     document.getElementById('job_title').value = '';
     document.getElementById('job_description').value = '';
-    document.getElementById('formTitle').textContent = 'Add New Job Description';
-    document.getElementById('submitBtn').textContent = 'Save Job Description';
+    document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle me-2 text-primary"></i>Add New Job Description';
+    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save me-2"></i>Save Job Description';
     document.getElementById('cancelBtn').classList.add('d-none');
 }
 </script>
