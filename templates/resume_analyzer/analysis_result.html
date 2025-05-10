@@ -4,19 +4,20 @@
 <div class="row justify-content-center">
     <div class="col-lg-10">
         <h2 class="h3 mb-4 d-flex align-items-center">
-            <i class="fas fa-chart-bar me-2 text-primary"></i>Analysis Result
+            <i class="fas fa-chart-bar me-2 gradient-text"></i><span class="gradient-text">Analysis Result</span>
         </h2>
 
         <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-primary text-white py-3">
+            <div class="card-header py-3">
                 <h3 class="h5 mb-0 d-flex align-items-center">
-                    <i class="fas fa-percentage me-2"></i>Match Score
+                    <i class="fas fa-percentage me-2 gradient-text"></i>Match Score
                 </h3>
             </div>
             <div class="card-body text-center py-4">
-                <div class="score-display mb-2">{{ result.similarity_score|floatformat:1 }}%</div>
-                <div class="progress" style="height: 8px;">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ result.similarity_score }}%;" 
+                <div class="score-display mb-3 gradient-text" style="font-size: 2.5rem; font-weight: 700;">{{ result.similarity_score|floatformat:1 }}%</div>
+                <div class="progress" style="height: 10px; background-color: rgba(255, 255, 255, 0.1); border-radius: 8px;">
+                    <div class="progress-bar" role="progressbar" 
+                         style="width: {{ result.similarity_score }}%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); border-radius: 8px;" 
                          aria-valuenow="{{ result.similarity_score }}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
@@ -25,38 +26,38 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-light py-3">
-                        <h3 class="h5 mb-0 d-flex align-items-center text-dark">
-                            <i class="fas fa-code me-2 text-primary"></i>Extracted Skills
+                    <div class="card-header py-3">
+                        <h3 class="h5 mb-0 d-flex align-items-center">
+                            <i class="fas fa-code me-2 gradient-text"></i>Extracted Skills
                         </h3>
                     </div>
                     <div class="card-body">
-                        <div class="p-1">{{ result.extracted_skills }}</div>
+                        <div class="p-1 text-white" style="color: var(--text-primary) !important;">{{ result.extracted_skills }}</div>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-light py-3">
-                        <h3 class="h5 mb-0 d-flex align-items-center text-dark">
-                            <i class="fas fa-briefcase me-2 text-primary"></i>Job Title
+                    <div class="card-header py-3">
+                        <h3 class="h5 mb-0 d-flex align-items-center">
+                            <i class="fas fa-briefcase me-2 gradient-text"></i>Job Title
                         </h3>
                     </div>
                     <div class="card-body">
-                        <div class="p-1">{{ job_description.title }}</div>
+                        <div class="p-1 text-white" style="color: var(--text-primary) !important;">{{ job_description.title }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="card my-4 shadow-sm">
-            <div class="card-header bg-light py-3">
-                <h3 class="h5 mb-0 d-flex align-items-center text-dark">
-                    <i class="fas fa-history me-2 text-primary"></i>Extracted Experience
+            <div class="card-header py-3">
+                <h3 class="h5 mb-0 d-flex align-items-center">
+                    <i class="fas fa-history me-2 gradient-text"></i>Extracted Experience
                 </h3>
             </div>
             <div class="card-body">
-                <div class="p-1">{{ result.extracted_experience }}</div>
+                <div class="p-1 text-white" style="color: var(--text-primary) !important;">{{ result.extracted_experience }}</div>
             </div>
         </div>
 

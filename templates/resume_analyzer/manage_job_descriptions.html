@@ -3,8 +3,8 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col-12">
-        <h1 class="display-5 fw-bold mb-3">Manage Job Descriptions</h1>
-        <p class="lead text-muted">Create, edit and manage your job descriptions for resume analysis</p>
+        <h1 class="display-5 fw-bold mb-3 gradient-text">Manage Job Descriptions</h1>
+        <p class="lead text-white-50">Create, edit and manage your job descriptions for resume analysis</p>
     </div>
 </div>
 
@@ -12,33 +12,40 @@
     <div class="col-lg-5 mb-4">
         <!-- Add New Job Description Form -->
         <div class="card shadow-sm mb-4" id="jobDescriptionForm">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0" id="formTitle"><i class="fas fa-plus-circle me-2 text-primary"></i>Add New Job Description</h5>
+            <div class="card-header py-3">
+                <h5 class="mb-0" id="formTitle"><i class="fas fa-plus-circle me-2 gradient-text"></i>Add New Job Description</h5>
             </div>
             <div class="card-body p-4">
                 <form method="post">
                     {% csrf_token %}
                     <input type="hidden" id="edit_id" name="edit_id" value="">
                     <div class="mb-3">
-                        <label for="job_title" class="form-label fw-medium">Job Title</label>
+                        <label for="job_title" class="form-label fw-medium text-white">Job Title</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="fas fa-briefcase text-primary"></i></span>
-                            <input type="text" class="form-control" id="job_title" name="job_title" placeholder="e.g. Software Engineer" required>
+                            <span class="input-group-text bg-transparent border-secondary text-white">
+                                <i class="fas fa-briefcase gradient-text"></i>
+                            </span>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" 
+                                   id="job_title" name="job_title" placeholder="e.g. Software Engineer" required>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label for="job_description" class="form-label fw-medium">Job Description</label>
+                        <label for="job_description" class="form-label fw-medium text-white">Job Description</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="fas fa-file-alt text-primary"></i></span>
-                            <textarea class="form-control" id="job_description" name="job_description" rows="8" placeholder="Enter detailed job requirements, responsibilities, and qualifications..." required></textarea>
+                            <span class="input-group-text bg-transparent border-secondary text-white">
+                                <i class="fas fa-file-alt gradient-text"></i>
+                            </span>
+                            <textarea class="form-control bg-dark text-white border-secondary" 
+                                      id="job_description" name="job_description" rows="8" 
+                                      placeholder="Enter detailed job requirements, responsibilities, and qualifications..." required></textarea>
                         </div>
-                        <div class="form-text">Include skills, experience requirements, and responsibilities for better matching.</div>
+                        <div class="form-text text-white-50">Include skills, experience requirements, and responsibilities for better matching.</div>
                     </div>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary px-4" id="submitBtn">
                             <i class="fas fa-save me-2"></i>Save Job Description
                         </button>
-                        <button type="button" class="btn btn-outline-secondary d-none" id="cancelBtn" onclick="cancelEdit()">
+                        <button type="button" class="btn btn-outline-secondary text-white" id="cancelBtn" onclick="cancelEdit()">
                             <i class="fas fa-times me-2"></i>Cancel
                         </button>
                     </div>
@@ -50,21 +57,21 @@
     <div class="col-lg-7">
         <!-- List of Existing Job Descriptions -->
         <div class="card shadow-sm">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0"><i class="fas fa-list me-2 text-primary"></i>Existing Job Descriptions</h5>
+            <div class="card-header py-3">
+                <h5 class="mb-0"><i class="fas fa-list me-2 gradient-text"></i>Existing Job Descriptions</h5>
             </div>
             <div class="card-body p-0">
                 {% if job_descriptions %}
                     <div class="list-group list-group-flush">
                         {% for jd in job_descriptions %}
-                            <div class="list-group-item p-4 border-bottom">
+                            <div class="list-group-item p-4 border-bottom bg-transparent">
                                 <div class="d-flex w-100 justify-content-between align-items-center mb-2">
-                                    <h5 class="mb-0 fw-bold">{{ jd.title }}</h5>
-                                    <span class="badge bg-light text-dark rounded-pill">
+                                    <h5 class="mb-0 fw-bold text-white">{{ jd.title }}</h5>
+                                    <span class="badge bg-dark text-white-50 border border-secondary rounded-pill">
                                         <i class="far fa-calendar-alt me-1"></i>{{ jd.created_at|date:"F d, Y" }}
                                     </span>
                                 </div>
-                                <p class="mb-3 text-muted">{{ jd.content|truncatechars:200 }}</p>
+                                <p class="mb-3 text-white-50">{{ jd.content|truncatechars:200 }}</p>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-sm btn-outline-primary" onclick="editJobDescription('{{ jd.id }}', '{{ jd.title|escapejs }}', '{{ jd.content|escapejs }}')">
                                         <i class="fas fa-edit me-1"></i>Edit
@@ -79,9 +86,9 @@
                 {% else %}
                     <div class="p-4 text-center">
                         <div class="py-5">
-                            <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
-                            <h5>No Job Descriptions Available</h5>
-                            <p class="text-muted">Add your first job description using the form.</p>
+                            <i class="fas fa-file-alt fa-4x text-white-50 mb-3"></i>
+                            <h5 class="text-white">No Job Descriptions Available</h5>
+                            <p class="text-white-50">Add your first job description using the form.</p>
                         </div>
                     </div>
                 {% endif %}
@@ -92,7 +99,7 @@
             <a href="{% url 'upload_resume' %}" class="btn btn-success">
                 <i class="fas fa-file-upload me-2"></i>Upload Resume
             </a>
-            <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary text-white">
                 <i class="fas fa-home me-2"></i>Back to Home
             </a>
         </div>
@@ -104,7 +111,7 @@ function editJobDescription(id, title, content) {
     document.getElementById('edit_id').value = id;
     document.getElementById('job_title').value = title;
     document.getElementById('job_description').value = content;
-    document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit me-2 text-primary"></i>Edit Job Description';
+    document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit me-2 gradient-text"></i>Edit Job Description';
     document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save me-2"></i>Update Job Description';
     document.getElementById('cancelBtn').classList.remove('d-none');
     document.getElementById('jobDescriptionForm').scrollIntoView({ behavior: 'smooth' });
@@ -114,7 +121,7 @@ function cancelEdit() {
     document.getElementById('edit_id').value = '';
     document.getElementById('job_title').value = '';
     document.getElementById('job_description').value = '';
-    document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle me-2 text-primary"></i>Add New Job Description';
+    document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle me-2 gradient-text"></i>Add New Job Description';
     document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save me-2"></i>Save Job Description';
     document.getElementById('cancelBtn').classList.add('d-none');
 }

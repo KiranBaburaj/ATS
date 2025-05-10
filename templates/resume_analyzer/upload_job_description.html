@@ -1,17 +1,38 @@
 {% extends 'resume_analyzer/base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Enter Job Description</h2>
-<form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label for="job_title" class="form-label">Job Title</label>
-        <input type="text" class="form-control" id="job_title" name="job_title" required>
+<h2 class="mb-4 gradient-text">Enter Job Description</h2>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="job_title" class="form-label text-white">Job Title</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-secondary text-white">
+                        <i class="fas fa-briefcase"></i>
+                    </span>
+                    <input type="text" class="form-control bg-dark text-white border-secondary" 
+                           id="job_title" name="job_title" placeholder="Enter the job position title" required>
+                </div>
+                <small class="text-muted">Example: Senior Software Engineer, Marketing Manager, etc.</small>
+            </div>
+            <div class="mb-3">
+                <label for="job_description" class="form-label text-white">Job Description</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-secondary text-white">
+                        <i class="fas fa-file-alt"></i>
+                    </span>
+                    <textarea class="form-control bg-dark text-white border-secondary" 
+                              id="job_description" name="job_description" rows="10" 
+                              placeholder="Paste the full job description here" required></textarea>
+                </div>
+                <small class="text-muted">Include responsibilities, requirements, and qualifications</small>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Analyze
+            </button>
+        </form>
     </div>
-    <div class="mb-3">
-        <label for="job_description" class="form-label">Job Description</label>
-        <textarea class="form-control" id="job_description" name="job_description" rows="10" required></textarea>
-    </div>
-    <button type="submit" class="btn btn-primary">Analyze</button>
-</form>
+</div>
 {% endblock %}
