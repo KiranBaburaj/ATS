@@ -204,7 +204,7 @@ def profile(request):
     return render(request, 'resume_analyzer/profile.html', {'user': user})
 
 # Protect existing views with the token_required decorator
-@token_required
+
 def home(request):
     return render(request, 'resume_analyzer/home.html')
 
@@ -218,6 +218,12 @@ def manage_job_descriptions(request):
         if edit_id:  # Editing existing job description
             try:
                 object_id = ObjectId(edit_id)
+                # Check if the job description belongs to the current user
+                existing_jd = db.job_descriptions.find_one({'_id': object_id})
+                if not existing_jd or existing_jd.get('user_id') != str(request.user['_id']):
+                    messages.error(request, "You don't have permission to edit this job description.")
+                    return redirect('manage_job_descriptions')
+                    
                 result = db.job_descriptions.update_one(
                     {'_id': object_id},
                     {'$set': {
@@ -238,6 +244,7 @@ def manage_job_descriptions(request):
                 jd_id = db.job_descriptions.insert_one({
                     'title': job_title,
                     'content': job_description,
+                    'user_id': str(request.user['_id']),  # Associate with current user
                     'created_at': datetime.datetime.now()
                 }).inserted_id
                 messages.success(request, f"Job description '{job_title}' saved successfully.")
@@ -246,8 +253,8 @@ def manage_job_descriptions(request):
         
         return redirect('manage_job_descriptions')
     
-    # Get all job descriptions from MongoDB
-    job_descriptions = list(db.job_descriptions.find().sort('created_at', -1))
+    # Get job descriptions for the current user only
+    job_descriptions = list(db.job_descriptions.find({'user_id': str(request.user['_id'])}).sort('created_at', -1))
     
     # Convert MongoDB _id to string and add as id attribute
     for jd in job_descriptions:
@@ -257,11 +264,16 @@ def manage_job_descriptions(request):
         'job_descriptions': job_descriptions
     })
 
-# Apply the decorator to other views that need authentication
 @token_required
 def delete_job_description(request, jd_id):
     try:
         object_id = ObjectId(jd_id)
+        # Check if the job description belongs to the current user
+        existing_jd = db.job_descriptions.find_one({'_id': object_id})
+        if not existing_jd or existing_jd.get('user_id') != str(request.user['_id']):
+            messages.error(request, "You don't have permission to delete this job description.")
+            return redirect('manage_job_descriptions')
+            
         result = db.job_descriptions.delete_one({'_id': object_id})
         
         if result.deleted_count > 0:
@@ -273,10 +285,11 @@ def delete_job_description(request, jd_id):
     
     return redirect('manage_job_descriptions')
 
-# Modified upload_resume view
+
+@token_required
 def upload_resume(request):
-    # Get all job descriptions for selection
-    job_descriptions = list(db.job_descriptions.find().sort('created_at', -1))
+    # Get job descriptions for the current user only
+    job_descriptions = list(db.job_descriptions.find({'user_id': str(request.user['_id'])}).sort('created_at', -1))
     
     # Convert MongoDB _id to string and add as id attribute
     for jd in job_descriptions:
@@ -307,8 +320,9 @@ def upload_resume(request):
             jd_object_id = ObjectId(selected_jd_id)
             job_description = db.job_descriptions.find_one({'_id': jd_object_id})
             
-            if not job_description:
-                messages.error(request, "Selected job description not found.")
+            # Verify the job description belongs to the current user
+            if not job_description or job_description.get('user_id') != str(request.user['_id']):
+                messages.error(request, "You don't have permission to use this job description.")
                 return render(request, 'resume_analyzer/upload_resume.html', {
                     'job_descriptions': job_descriptions
                 })
@@ -344,7 +358,8 @@ def upload_resume(request):
             resume_id = db.resumes.insert_one({
                 'filename': resume_file.name,
                 'content': resume_content,
-                'job_description_id': selected_jd_id,  # Store reference to selected JD
+                'job_description_id': selected_jd_id,
+                'user_id': str(request.user['_id']),  # Associate with current user
                 'uploaded_at': datetime.datetime.now()
             }).inserted_id
             
@@ -386,6 +401,7 @@ def upload_resume(request):
             result_id = db.analysis_results.insert_one({
                 'resume_id': str(resume_id),
                 'job_description_id': selected_jd_id,
+                'user_id': str(request.user['_id']),  # Associate with current user
                 'similarity_score': float(similarity_score.item() * 100),
                 'extracted_skills': skills,
                 'extracted_experience': experience,
@@ -410,6 +426,7 @@ def upload_resume(request):
 #     ... (remove this function)
 
 # Keep the analysis_result view as is
+@token_required
 def analysis_result(request, result_id):
     try:
         print(f"Attempting to retrieve result with ID: {result_id}")
@@ -428,6 +445,11 @@ def analysis_result(request, result_id):
         
         if result is None:
             messages.error(request, f"Analysis result with ID {result_id} not found in database.")
+            return redirect('home')
+        
+        # Verify the result belongs to the current user
+        if result.get('user_id') != str(request.user['_id']):
+            messages.error(request, "You don't have permission to view this analysis result.")
             return redirect('home')
         
         # Convert string IDs to ObjectId
@@ -461,10 +483,15 @@ def analysis_result(request, result_id):
         messages.error(request, f"Error retrieving analysis result: {str(e)}")
         return redirect('home')
 
+
+
 # Add this new view function after the existing ones
+@token_required
 def view_applicants(request):
     # Get all analysis results sorted by similarity score in descending order
-    analysis_results = list(db.analysis_results.find().sort('similarity_score', -1))
+    analysis_results = list(db.analysis_results.find({'user_id': str(request.user['_id'])}).sort('similarity_score', -1))
+    print(f"User ID being used for query: {str(request.user['_id'])}")
+    print(f"Number of results found: {len(analysis_results)}")
     
     # Fetch related resume and job description data for each result
     applicants = []
@@ -494,6 +521,12 @@ def view_applicants(request):
 def edit_job_description(request, jd_id):
     try:
         object_id = ObjectId(jd_id)
+        
+        # Check if the job description belongs to the current user
+        existing_jd = db.job_descriptions.find_one({'_id': object_id})
+        if not existing_jd or existing_jd.get('user_id') != str(request.user['_id']):
+            messages.error(request, "You don't have permission to edit this job description.")
+            return redirect('manage_job_descriptions')
         
         if request.method == 'POST':
             job_title = request.POST.get('job_title')
