@@ -10,15 +10,205 @@ import datetime
 from bson.objectid import ObjectId
 import fitz  # PyMuPDF
 import io
-from django.contrib import messages  # Add this import for flash messages
+from django.contrib import messages
+import jwt
+import bcrypt
+from django.views.decorators.csrf import csrf_exempt
+import json
+from functools import wraps
 
 # Access the MongoDB connection from settings
 db = settings.DB
 
+# JWT Configuration
+JWT_SECRET = 'your_jwt_secret_key'  # Store this in settings.py in production
+JWT_ALGORITHM = 'HS256'
+JWT_EXPIRATION_DELTA = datetime.timedelta(days=7)
+
+# JWT Authentication Decorator
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        request = args[0]
+        token = None
+        
+        # Get token from cookies or Authorization header
+        if 'jwt_token' in request.COOKIES:
+            token = request.COOKIES.get('jwt_token')
+        elif 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            if auth_header.startswith('Bearer '):
+                token = auth_header[7:]
+        
+        if not token:
+            messages.error(request, "Authentication token is missing!")
+            return redirect('login')
+        
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            user_id = payload['user_id']
+            
+            # Check if user exists in database
+            user = db.users.find_one({'_id': ObjectId(user_id)})
+            if not user:
+                messages.error(request, "User not found!")
+                return redirect('login')
+                
+            # Add user to request for use in the view
+            request.user = user
+            
+        except jwt.ExpiredSignatureError:
+            messages.error(request, "Token has expired. Please log in again.")
+            return redirect('login')
+        except jwt.InvalidTokenError:
+            messages.error(request, "Invalid token. Please log in again.")
+            return redirect('login')
+            
+        return f(*args, **kwargs)
+    return decorated
+
+# User Registration View
+@csrf_exempt
+def signup(request):
+    if request.method == 'POST':
+        try:
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                email = data.get('email')
+                password = data.get('password')
+                name = data.get('name')
+            else:
+                email = request.POST.get('email')
+                password = request.POST.get('password')
+                name = request.POST.get('name')
+            
+            # Validate input
+            if not email or not password or not name:
+                if request.content_type == 'application/json':
+                    return JsonResponse({'error': 'Email, password, and name are required'}, status=400)
+                messages.error(request, "Email, password, and name are required")
+                return render(request, 'resume_analyzer/signup.html')
+            
+            # Check if user already exists
+            existing_user = db.users.find_one({'email': email})
+            if existing_user:
+                if request.content_type == 'application/json':
+                    return JsonResponse({'error': 'User with this email already exists'}, status=400)
+                messages.error(request, "User with this email already exists")
+                return render(request, 'resume_analyzer/signup.html')
+            
+            # Hash the password
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            
+            # Create new user
+            user_id = db.users.insert_one({
+                'email': email,
+                'password': hashed_password,
+                'name': name,
+                'created_at': datetime.datetime.now()
+            }).inserted_id
+            
+            if request.content_type == 'application/json':
+                return JsonResponse({'message': 'User registered successfully', 'user_id': str(user_id)}, status=201)
+            
+            messages.success(request, "Registration successful! Please log in.")
+            return redirect('login')
+            
+        except Exception as e:
+            if request.content_type == 'application/json':
+                return JsonResponse({'error': str(e)}, status=500)
+            messages.error(request, f"Registration error: {str(e)}")
+            return render(request, 'resume_analyzer/signup.html')
+    
+    return render(request, 'resume_analyzer/signup.html')
+
+# User Login View
+@csrf_exempt
+def login(request):
+    if request.method == 'POST':
+        try:
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                email = data.get('email')
+                password = data.get('password')
+            else:
+                email = request.POST.get('email')
+                password = request.POST.get('password')
+            
+            # Validate input
+            if not email or not password:
+                if request.content_type == 'application/json':
+                    return JsonResponse({'error': 'Email and password are required'}, status=400)
+                messages.error(request, "Email and password are required")
+                return render(request, 'resume_analyzer/login.html')
+            
+            # Find user by email
+            user = db.users.find_one({'email': email})
+            if not user:
+                if request.content_type == 'application/json':
+                    return JsonResponse({'error': 'Invalid email or password'}, status=401)
+                messages.error(request, "Invalid email or password")
+                return render(request, 'resume_analyzer/login.html')
+            
+            # Check password
+            if not bcrypt.checkpw(password.encode('utf-8'), user['password']):
+                if request.content_type == 'application/json':
+                    return JsonResponse({'error': 'Invalid email or password'}, status=401)
+                messages.error(request, "Invalid email or password")
+                return render(request, 'resume_analyzer/login.html')
+            
+            # Generate JWT token
+            payload = {
+                'user_id': str(user['_id']),
+                'email': user['email'],
+                'exp': datetime.datetime.utcnow() + JWT_EXPIRATION_DELTA
+            }
+            token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+            
+            if request.content_type == 'application/json':
+                return JsonResponse({
+                    'message': 'Login successful',
+                    'token': token,
+                    'user': {
+                        'id': str(user['_id']),
+                        'email': user['email'],
+                        'name': user['name']
+                    }
+                })
+            
+            # Set token in cookie and redirect
+            response = redirect('home')
+            response.set_cookie('jwt_token', token, max_age=JWT_EXPIRATION_DELTA.total_seconds(), httponly=True)
+            messages.success(request, f"Welcome back, {user.get('name', 'User')}!")
+            return response
+            
+        except Exception as e:
+            if request.content_type == 'application/json':
+                return JsonResponse({'error': str(e)}, status=500)
+            messages.error(request, f"Login error: {str(e)}")
+            return render(request, 'resume_analyzer/login.html')
+    
+    return render(request, 'resume_analyzer/login.html')
+
+# Logout View
+def logout(request):
+    response = redirect('login')
+    response.delete_cookie('jwt_token')
+    messages.success(request, "You have been logged out successfully.")
+    return response
+
+# User Profile View
+@token_required
+def profile(request):
+    user = request.user
+    return render(request, 'resume_analyzer/profile.html', {'user': user})
+
+# Protect existing views with the token_required decorator
+@token_required
 def home(request):
     return render(request, 'resume_analyzer/home.html')
 
-# New view to manage job descriptions
+@token_required
 def manage_job_descriptions(request):
     if request.method == 'POST':
         job_title = request.POST.get('job_title')
@@ -67,7 +257,8 @@ def manage_job_descriptions(request):
         'job_descriptions': job_descriptions
     })
 
-# New view to delete a job description
+# Apply the decorator to other views that need authentication
+@token_required
 def delete_job_description(request, jd_id):
     try:
         object_id = ObjectId(jd_id)
