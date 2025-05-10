@@ -63,32 +63,8 @@ def manage_job_descriptions(request):
     for jd in job_descriptions:
         jd['id'] = str(jd['_id'])
     
-    # Get all analysis results sorted by similarity score in descending order
-    analysis_results = list(db.analysis_results.find().sort('similarity_score', -1))
-    
-    # Fetch related resume and job description data for each result
-    applicants = []
-    for result in analysis_results:
-        try:
-            resume = db.resumes.find_one({'_id': ObjectId(result['resume_id'])})
-            job_desc = db.job_descriptions.find_one({'_id': ObjectId(result['job_description_id'])})
-            
-            if resume and job_desc:
-                applicants.append({
-                    'id': str(result['_id']),
-                    'filename': resume['filename'],
-                    'job_title': job_desc['title'],
-                    'similarity_score': result['similarity_score'],
-                    'extracted_skills': result['extracted_skills'],
-                    'created_at': result['created_at']
-                })
-        except Exception as e:
-            print(f"Error processing result: {str(e)}")
-            continue
-    
     return render(request, 'resume_analyzer/manage_job_descriptions.html', {
-        'job_descriptions': job_descriptions,
-        'applicants': applicants
+        'job_descriptions': job_descriptions
     })
 
 # New view to delete a job description
@@ -293,6 +269,35 @@ def analysis_result(request, result_id):
         print(f"Unexpected error in analysis_result view: {str(e)}")
         messages.error(request, f"Error retrieving analysis result: {str(e)}")
         return redirect('home')
+
+# Add this new view function after the existing ones
+def view_applicants(request):
+    # Get all analysis results sorted by similarity score in descending order
+    analysis_results = list(db.analysis_results.find().sort('similarity_score', -1))
+    
+    # Fetch related resume and job description data for each result
+    applicants = []
+    for result in analysis_results:
+        try:
+            resume = db.resumes.find_one({'_id': ObjectId(result['resume_id'])})
+            job_desc = db.job_descriptions.find_one({'_id': ObjectId(result['job_description_id'])})  
+            
+            if resume and job_desc:
+                applicants.append({
+                    'id': str(result['_id']),
+                    'filename': resume['filename'],
+                    'job_title': job_desc['title'],
+                    'similarity_score': result['similarity_score'],
+                    'extracted_skills': result['extracted_skills'],
+                    'created_at': result['created_at']
+                })
+        except Exception as e:
+            print(f"Error processing result: {str(e)}")
+            continue
+    
+    return render(request, 'resume_analyzer/view_applicants.html', {
+        'applicants': applicants
+    })
 
 # Add this new view function
 def edit_job_description(request, jd_id):

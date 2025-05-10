@@ -7,9 +7,10 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('job-descriptions/', views.manage_job_descriptions, name='manage_job_descriptions'),
     path('job-descriptions/delete/<str:jd_id>/', views.delete_job_description, name='delete_job_description'),
-    path('job-descriptions/edit/<str:jd_id>/', views.edit_job_description, name='edit_job_description'),  # Add this line
+    path('job-descriptions/edit/<str:jd_id>/', views.edit_job_description, name='edit_job_description'),
     path('upload-resume/', views.upload_resume, name='upload_resume'),
     path('analysis-result/<str:result_id>/', views.analysis_result, name='analysis_result'),
+    path('applicants/', views.view_applicants, name='view_applicants'),  # Add this new URL pattern
 ]
 
 if settings.DEBUG:
