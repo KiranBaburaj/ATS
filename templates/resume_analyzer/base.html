@@ -352,6 +352,37 @@
             font-weight: 600;
             margin-right: 0.5rem;
         }
+        
+        /* Update the existing media query in the <style> section */
+        @media (min-width: 1200px) {
+            /* Make both navbar and main content containers full width */
+            .navbar .container,
+            .main-container .container {
+                max-width: 100%;
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+            
+            /* Add max-width to content elements to maintain readability */
+            .row {
+                max-width: 1600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+        
+        /* Add additional breakpoint for extra large screens */
+        @media (min-width: 1920px) {
+            .navbar .container,
+            .main-container .container {
+                padding-left: 4rem;
+                padding-right: 4rem;
+            }
+            
+            .row {
+                max-width: 1800px;
+            }
+        }
     </style>
 </head>
 <body>
