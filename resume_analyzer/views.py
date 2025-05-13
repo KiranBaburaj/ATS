@@ -300,13 +300,13 @@ def upload_resume(request):
         return redirect('manage_job_descriptions')
     
     if request.method == 'POST':
-        if 'resume_file' not in request.FILES:
-            messages.error(request, "Please select a resume file.")
+        if 'resume_files' not in request.FILES:
+            messages.error(request, "Please select at least one resume file.")
             return render(request, 'resume_analyzer/upload_resume.html', {
                 'job_descriptions': job_descriptions
             })
             
-        resume_file = request.FILES['resume_file']
+        resume_files = request.FILES.getlist('resume_files')
         selected_jd_id = request.POST.get('job_description')
         
         if not selected_jd_id:
@@ -327,92 +327,108 @@ def upload_resume(request):
                     'job_descriptions': job_descriptions
                 })
             
-            file_extension = os.path.splitext(resume_file.name)[1].lower()
+            # Process multiple files
+            result_ids = []
             
-            # Read the file content
-            file_bytes = resume_file.read()
-            
-            # Extract text based on file type
-            if file_extension == '.pdf':
-                # Use PyMuPDF for PDF extraction
-                try:
-                    # Open the PDF from memory buffer
-                    pdf_document = fitz.open(stream=file_bytes, filetype="pdf")
-                    
-                    # Extract text from all pages
-                    resume_content = ""
-                    for page_num in range(len(pdf_document)):
-                        page = pdf_document[page_num]
-                        resume_content += page.get_text()
-                    
-                    pdf_document.close()
-                except Exception as e:
-                    # Fallback to simple decoding if PDF extraction fails
+            for resume_file in resume_files:
+                file_extension = os.path.splitext(resume_file.name)[1].lower()
+                
+                # Read the file content
+                file_bytes = resume_file.read()
+                
+                # Extract text based on file type
+                if file_extension == '.pdf':
+                    # Use PyMuPDF for PDF extraction
+                    try:
+                        # Open the PDF from memory buffer
+                        pdf_document = fitz.open(stream=file_bytes, filetype="pdf")
+                        
+                        # Extract text from all pages
+                        resume_content = ""
+                        for page_num in range(len(pdf_document)):
+                            page = pdf_document[page_num]
+                            resume_content += page.get_text()
+                        
+                        pdf_document.close()
+                    except Exception as e:
+                        # Fallback to simple decoding if PDF extraction fails
+                        resume_content = file_bytes.decode('utf-8', errors='ignore')
+                        print(f"PDF extraction error: {str(e)}")
+                else:
+                    # For non-PDF files, use simple decoding
                     resume_content = file_bytes.decode('utf-8', errors='ignore')
-                    print(f"PDF extraction error: {str(e)}")
-            else:
-                # For non-PDF files, use simple decoding
-                resume_content = file_bytes.decode('utf-8', errors='ignore')
+                
+                # Store resume in MongoDB
+                resume_id = db.resumes.insert_one({
+                    'filename': resume_file.name,
+                    'content': resume_content,
+                    'job_description_id': selected_jd_id,
+                    'user_id': str(request.user['_id']),  # Associate with current user
+                    'uploaded_at': datetime.datetime.now()
+                }).inserted_id
+                
+                # Analyze using ATS with detailed error tracking
+                try:
+                    print(f"Starting ATS analysis for {resume_file.name}...")
+                    ats = ATS()
+                    
+                    print("Loading resume...")
+                    ats.load_resume(resume_content)
+                    
+                    print("Loading job description...")
+                    ats.load_job_description(job_description['content'])
+                    
+                    print("Extracting experience...")
+                    experience = ats.extract_experience()
+                    
+                    print("Cleaning experience...")
+                    ats.clean_experience(experience)
+                    
+                    print("Extracting skills...")
+                    skills = " ".join(ats.extract_skills())
+                    
+                    print("Cleaning skills...")
+                    ats.clean_skills(skills)
+                    
+                    print("Computing similarity score...")
+                    similarity_score = ats.compute_similarity()
+                    print(f"Analysis complete. Similarity score: {similarity_score}")
+                    
+                    # Store results in MongoDB
+                    result_id = db.analysis_results.insert_one({
+                        'resume_id': str(resume_id),
+                        'job_description_id': selected_jd_id,
+                        'user_id': str(request.user['_id']),  # Associate with current user
+                        'similarity_score': float(similarity_score.item() * 100),
+                        'extracted_skills': skills,
+                        'extracted_experience': experience,
+                        'created_at': datetime.datetime.now(),
+                        'filename': resume_file.name  # Add filename for easier identification
+                    }).inserted_id
+                    
+                    result_ids.append(str(result_id))
+                    
+                except Exception as ats_error:
+                    print(f"ATS Analysis error for {resume_file.name}: {str(ats_error)}")
+                    messages.error(request, f"Error analyzing {resume_file.name}: {str(ats_error)}")
             
-            # Store resume in MongoDB
-            resume_id = db.resumes.insert_one({
-                'filename': resume_file.name,
-                'content': resume_content,
-                'job_description_id': selected_jd_id,
-                'user_id': str(request.user['_id']),  # Associate with current user
-                'uploaded_at': datetime.datetime.now()
-            }).inserted_id
-            
-            # Analyze using ATS with detailed error tracking
-            try:
-                print("Starting ATS analysis...")
-                ats = ATS()
-                
-                print("Loading resume...")
-                ats.load_resume(resume_content)
-                
-                print("Loading job description...")
-                ats.load_job_description(job_description['content'])
-                
-                print("Extracting experience...")
-                experience = ats.extract_experience()
-                
-                print("Cleaning experience...")
-                ats.clean_experience(experience)
-                
-                print("Extracting skills...")
-                skills = " ".join(ats.extract_skills())
-                
-                print("Cleaning skills...")
-                ats.clean_skills(skills)
-                
-                print("Computing similarity score...")
-                similarity_score = ats.compute_similarity()
-                print(f"Analysis complete. Similarity score: {similarity_score}")
-                
-            except Exception as ats_error:
-                print(f"ATS Analysis error: {str(ats_error)}")
-                messages.error(request, f"Error during resume analysis: {str(ats_error)}")
+            # If no results were successfully processed
+            if not result_ids:
+                messages.error(request, "No resumes were successfully analyzed.")
                 return render(request, 'resume_analyzer/upload_resume.html', {
                     'job_descriptions': job_descriptions
                 })
             
-            # Store results in MongoDB
-            result_id = db.analysis_results.insert_one({
-                'resume_id': str(resume_id),
-                'job_description_id': selected_jd_id,
-                'user_id': str(request.user['_id']),  # Associate with current user
-                'similarity_score': float(similarity_score.item() * 100),
-                'extracted_skills': skills,
-                'extracted_experience': experience,
-                'created_at': datetime.datetime.now()
-            }).inserted_id
+            # If only one result, redirect to single result page
+            if len(result_ids) == 1:
+                return redirect('analysis_result', result_id=result_ids[0])
             
-            return redirect('analysis_result', result_id=str(result_id))
+            # For multiple results, redirect to bulk results page
+            return redirect('bulk_analysis_results', result_ids=','.join(result_ids))
             
         except Exception as e:
             print(f"Resume upload error: {str(e)}")
-            messages.error(request, f"Error processing resume: {str(e)}")
+            messages.error(request, f"Error processing resumes: {str(e)}")
             return render(request, 'resume_analyzer/upload_resume.html', {
                 'job_descriptions': job_descriptions
             })
@@ -483,7 +499,52 @@ def analysis_result(request, result_id):
         messages.error(request, f"Error retrieving analysis result: {str(e)}")
         return redirect('home')
 
-
+@token_required
+def bulk_analysis_results(request, result_ids):
+    try:
+        # Split the comma-separated result IDs
+        result_id_list = result_ids.split(',')
+        results = []
+        
+        for result_id in result_id_list:
+            try:
+                object_id = ObjectId(result_id)
+                result = db.analysis_results.find_one({'_id': object_id})
+                
+                # Verify the result belongs to the current user
+                if result and result.get('user_id') == str(request.user['_id']):
+                    # Get related resume and job description
+                    resume_id = ObjectId(result['resume_id'])
+                    jd_id = ObjectId(result['job_description_id'])
+                    
+                    resume = db.resumes.find_one({'_id': resume_id})
+                    job_description = db.job_descriptions.find_one({'_id': jd_id})
+                    
+                    if resume and job_description:
+                        # Add additional info to result
+                        result['resume'] = resume
+                        result['job_description'] = job_description
+                        result['id'] = result_id
+                        results.append(result)
+            except Exception as e:
+                print(f"Error processing result {result_id}: {str(e)}")
+        
+        if not results:
+            messages.error(request, "No valid analysis results found.")
+            return redirect('home')
+        
+        # Sort results by similarity score (highest first)
+        results.sort(key=lambda x: x.get('similarity_score', 0), reverse=True)
+        
+        return render(request, 'resume_analyzer/bulk_analysis_results.html', {
+            'results': results,
+            'job_description': results[0]['job_description']  # All results use the same job description
+        })
+        
+    except Exception as e:
+        print(f"Error in bulk_analysis_results view: {str(e)}")
+        messages.error(request, f"Error retrieving analysis results: {str(e)}")
+        return redirect('home')
 
 # Add this new view function after the existing ones
 @token_required
@@ -516,6 +577,7 @@ def view_applicants(request):
     return render(request, 'resume_analyzer/view_applicants.html', {
         'applicants': applicants
     })
+    
 
 # Add this new view function
 def edit_job_description(request, jd_id):

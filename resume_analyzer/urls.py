@@ -11,6 +11,8 @@ urlpatterns = [
     path('upload-resume/', views.upload_resume, name='upload_resume'),
     path('analysis-result/<str:result_id>/', views.analysis_result, name='analysis_result'),
     path('applicants/', views.view_applicants, name='view_applicants'),  # Add this new URL pattern
+    # Add this to your existing urlpatterns
+    path('bulk-analysis-results/<str:result_ids>/', views.bulk_analysis_results, name='bulk_analysis_results'),
     
     # Authentication URLs
     path('signup/', views.signup, name='signup'),
