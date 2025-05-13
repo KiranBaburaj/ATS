@@ -1,10 +1,12 @@
 from django.shortcuts import render
 
+
+from .atslogic import ATS 
 # Create your views here.
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.conf import settings
-from simple_ats.ats import ATS
+#from simple_ats.ats import ATS
 import os
 import datetime
 from bson.objectid import ObjectId
@@ -366,6 +368,7 @@ def upload_resume(request):
                     'user_id': str(request.user['_id']),  # Associate with current user
                     'uploaded_at': datetime.datetime.now()
                 }).inserted_id
+                
                 
                 # Analyze using ATS with detailed error tracking
                 try:

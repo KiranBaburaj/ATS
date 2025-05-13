@@ -1,87 +1,93 @@
 {% extends 'resume_analyzer/base.html' %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h2 class="card-title h4 mb-3">Bulk Analysis Results</h2>
-                    <p class="text-muted mb-0">
-                        <i class="fas fa-briefcase me-2"></i>Job Description: <strong>{{ job_description.title }}</strong>
-                    </p>
-                    <p class="text-muted mb-0">
-                        <i class="fas fa-file-alt me-2"></i>Total Resumes Analyzed: <strong>{{ results|length }}</strong>
-                    </p>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <h2 class="h3 mb-4 d-flex align-items-center">
+            <i class="fas fa-chart-bar me-2 gradient-text"></i><span class="gradient-text">Bulk Analysis Results</span>
+        </h2>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header py-3">
+                <h3 class="h5 mb-0 d-flex align-items-center">
+                    <i class="fas fa-briefcase me-2 gradient-text"></i>Job Description
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">
+                    <strong>{{ job_description.title }}</strong>
+                </p>
+                <p class="mb-0 mt-2">
+                    <i class="fas fa-file-alt me-2"></i>Total Resumes Analyzed: <strong>{{ results|length }}</strong>
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header py-3">
+                <h3 class="h5 mb-0 d-flex align-items-center">
+                    <i class="fas fa-list me-2 gradient-text"></i>Results Summary
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Resume</th>
+                                <th scope="col">Match Score</th>
+                                <th scope="col">Skills</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ result.filename }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 8px; background-color: rgba(255, 255, 255, 0.1); border-radius: 8px;">
+                                            <div class="progress-bar" 
+                                                 role="progressbar" 
+                                                 style="width: {{ result.similarity_score|floatformat:0 }}%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); border-radius: 8px;" 
+                                                 aria-valuenow="{{ result.similarity_score|floatformat:0 }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="gradient-text fw-bold">
+                                            {{ result.similarity_score|floatformat:0 }}%
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 250px; color: var(--text-primary) !important;">
+                                        {{ result.extracted_skills|truncatechars:100 }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{% url 'analysis_result' result_id=result.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-search me-1"></i>View Details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5 mb-3">Results Summary (Sorted by Match Score)</h3>
-                    
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Resume</th>
-                                    <th scope="col">Match Score</th>
-                                    <th scope="col">Skills</th>
-                                    <th scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for result in results %}
-                                <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td>{{ result.filename }}</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                                                <div class="progress-bar bg-{{ result.similarity_score|floatformat:0|divisibleby:70|yesno:'success,warning,danger' }}" 
-                                                     role="progressbar" 
-                                                     style="width: {{ result.similarity_score|floatformat:0 }}%" 
-                                                     aria-valuenow="{{ result.similarity_score|floatformat:0 }}" 
-                                                     aria-valuemin="0" 
-                                                     aria-valuemax="100"></div>
-                                            </div>
-                                            <span class="badge bg-{{ result.similarity_score|floatformat:0|divisibleby:70|yesno:'success,warning,danger' }}">
-                                                {{ result.similarity_score|floatformat:0 }}%
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="text-truncate" style="max-width: 250px;">
-                                            {{ result.extracted_skills|truncatechars:100 }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'analysis_result' result_id=result.id %}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-search me-1"></i>View Details
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+        
+        <div class="d-flex gap-2 mb-4">
+            <a href="{% url 'home' %}" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>Back to Home
+            </a>
+            <a href="{% url 'upload_resume' %}" class="btn btn-outline-primary">
+                <i class="fas fa-upload me-2"></i>Upload More Resumes
+            </a>
         </div>
-    </div>
-    
-    <div class="d-flex justify-content-between mt-4">
-        <a href="{% url 'upload_resume' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-upload me-2"></i>Upload More Resumes
-        </a>
-        <a href="{% url 'home' %}" class="btn btn-primary">
-            <i class="fas fa-home me-2"></i>Back to Dashboard
-        </a>
     </div>
 </div>
 {% endblock %}
+
