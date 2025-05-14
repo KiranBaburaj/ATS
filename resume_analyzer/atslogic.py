@@ -6,6 +6,8 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+import datetime
+
 
 class TextCleaner:
     """
@@ -365,20 +367,122 @@ class ATS:
     def compute_similarity(self):
         """
         Computes the similarity score between the cleaned resume and cleaned job description text using the SentenceTransformer model.
-
+        Adjusts weights based on candidate profile (fresher vs experienced).
+        
         Returns:
             float: The similarity score between the cleaned resume and cleaned job description text.
         """
         model = SentenceTransformer('all-MiniLM-L6-v2')
-        cleaned_resume = self.cleaned_experience + self.cleaned_skills
-        cleaned_jd_text = self.clean_jd()
-        sentences = [cleaned_resume, cleaned_jd_text]
-        embeddings1 = model.encode(sentences[0])
-        embeddings2 = model.encode(sentences[1])
         
-        similarity_score = model.similarity(embeddings1, embeddings2)
-
-        return similarity_score
+        # Extract skills from job description for weighting
+        temp_ats = ATS()
+        temp_ats.load_resume(self.jd_content)  # Use job description as "resume" to extract skills
+        jd_skills = set([skill.lower() for skill in temp_ats.extract_skills()])
+        
+        # Extract skills from resume
+        resume_skills = set([skill.lower() for skill in self.extract_skills()])
+        
+        # Calculate skill match ratio
+        if jd_skills:
+            matching_skills = resume_skills.intersection(jd_skills)
+            skill_match_ratio = len(matching_skills) / len(jd_skills) if jd_skills else 0
+        else:
+            skill_match_ratio = 0
+        
+        # Detect if candidate is likely a fresher based on experience section
+        experience = self.extract_experience()
+        is_fresher = self._is_likely_fresher(experience)
+        
+        # Adjust weights based on candidate profile
+        print("Skill Match Ratio:", skill_match_ratio)
+        print("Is Fresher:", is_fresher)
+        if is_fresher:
+            # For freshers, prioritize skills over experience
+            experience_weight = 0.3
+            skills_weight = 0.7
+        else:
+            # For experienced candidates, more balanced approach
+            experience_weight = 0.5
+            skills_weight = 0.5
+        
+        # Calculate semantic similarity for experience and skills separately
+        cleaned_experience = self.cleaned_experience if self.cleaned_experience else ""
+        cleaned_skills = self.cleaned_skills if self.cleaned_skills else ""
+        cleaned_jd_text = self.clean_jd()
+        
+        # Only compute experience similarity if there's actual experience content
+        if cleaned_experience.strip():
+            experience_embeddings = model.encode(cleaned_experience)
+            jd_embeddings = model.encode(cleaned_jd_text)
+            experience_similarity = model.similarity(experience_embeddings, jd_embeddings)
+        else:
+            # For candidates with no experience, set a base value
+            experience_similarity = 0.1  # Small non-zero value to avoid completely penalizing freshers
+        
+        # Compute skills similarity
+        if cleaned_skills.strip():
+            skills_embeddings = model.encode(cleaned_skills)
+            jd_embeddings = model.encode(cleaned_jd_text)
+            skills_similarity = model.similarity(skills_embeddings, jd_embeddings)
+        else:
+            skills_similarity = 0
+        
+        # Direct skill matching component (additional boost for exact skill matches)
+        skill_match_component = skill_match_ratio * 0.3  # 30% weight to direct skill matches
+        
+        # Combine components with appropriate weights
+        final_similarity = (experience_weight * experience_similarity) + \
+                           (skills_weight * skills_similarity) + \
+                           skill_match_component
+        
+        # Normalize to ensure score is between 0 and 1
+        final_similarity = min(final_similarity, 1.0)
+        
+        return final_similarity
+    
+    def _is_likely_fresher(self, experience_text):
+        """
+        Determines if a candidate is likely a fresher based on their experience section.
+        
+        Parameters:
+        -----------
+        experience_text : str
+            The extracted experience text from the resume.
+            
+        Returns:
+        --------
+        bool
+            True if the candidate is likely a fresher, False otherwise.
+        """
+        # If experience section is empty or very short, likely a fresher
+        if not experience_text or len(experience_text.strip()) < 100:
+            return True
+            
+        # Check for keywords indicating fresher status
+        fresher_indicators = [
+            'fresher', 'entry level', 'entry-level', 'recent graduate', 'new graduate',
+            'no experience', 'internship', 'intern', 'trainee', 'training'
+        ]
+        
+        # Check for years of experience indicators
+        experience_text_lower = experience_text.lower()
+        for indicator in fresher_indicators:
+            if indicator in experience_text_lower:
+                return True
+                
+        # Check for date patterns indicating less than 1-2 years of experience
+        # This is a simplified check - could be enhanced with more sophisticated date parsing
+        years_mentioned = re.findall(r'\b(20\d{2})\b', experience_text)
+        current_year = datetime.datetime.now().year
+        
+        if years_mentioned:
+            # If only recent years are mentioned (within last 2 years), likely a fresher
+            recent_years = [int(year) for year in years_mentioned if int(year) >= current_year - 2]
+            if len(recent_years) == len(years_mentioned):
+                return True
+        
+        # Default to assuming not a fresher if none of the above conditions are met
+        return False
 
 def main():
     # Get user input for resume and job description
