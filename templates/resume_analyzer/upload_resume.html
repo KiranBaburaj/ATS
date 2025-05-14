@@ -5,13 +5,13 @@
     <div class="col-lg-8">
         <div class="card shadow-sm">
             <div class="card-body p-4">
-                <h2 class="card-title h3 mb-3">Upload Resume</h2>
+                <h2 class="card-title h3 mb-3 text-white">Upload Resume</h2>
                 
                 <form method="post" enctype="multipart/form-data" id="resumeForm">
                     {% csrf_token %}
                     
                     <div class="mb-3">
-                        <label for="job_description" class="form-label fw-medium">Select Job Description</label>
+                        <label for="job_description" class="form-label fw-medium text-white">Select Job Description</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="fas fa-briefcase"></i></span>
                             <select class="form-select" id="job_description" name="job_description" required>
@@ -24,12 +24,12 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="resume_files" class="form-label fw-medium">Upload Resumes</label>
+                        <label for="resume_files" class="form-label fw-medium text-white">Upload Resumes</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="fas fa-file-upload"></i></span>
                             <input class="form-control" type="file" id="resume_files" name="resume_files" accept=".pdf,.txt,.docx" multiple required>
                         </div>
-                        <div class="form-text">Accepted formats: PDF, TXT, DOCX (Select multiple files)</div>
+                        <div class="form-text text-white">Accepted formats: PDF, TXT, DOCX (Select multiple files)</div>
                     </div>
                     
                     <div class="d-flex gap-2">
