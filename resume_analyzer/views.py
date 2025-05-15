@@ -1,6 +1,7 @@
 from django.shortcuts import render
+from .utils import get_resume_report_text_prompts, generate_and_get_resume_report
 
-
+import re  
 from .atslogic import ATS 
 # Create your views here.
 from django.shortcuts import render, redirect
@@ -26,6 +27,9 @@ db = settings.DB
 JWT_SECRET = 'your_jwt_secret_key'  # Store this in settings.py in production
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_DELTA = datetime.timedelta(days=7)
+
+
+
 
 # JWT Authentication Decorator
 def token_required(f):
@@ -333,100 +337,84 @@ def upload_resume(request):
             result_ids = []
             
             for resume_file in resume_files:
+                # Extract text from resume
                 file_extension = os.path.splitext(resume_file.name)[1].lower()
-                
-                # Read the file content
                 file_bytes = resume_file.read()
                 
-                # Extract text based on file type
-                if file_extension == '.pdf':
-                    # Use PyMuPDF for PDF extraction
-                    try:
-                        # Open the PDF from memory buffer
+                try:
+                    if file_extension == '.pdf':
                         pdf_document = fitz.open(stream=file_bytes, filetype="pdf")
-                        
-                        # Extract text from all pages
                         resume_content = ""
                         for page_num in range(len(pdf_document)):
                             page = pdf_document[page_num]
                             resume_content += page.get_text()
-                        
                         pdf_document.close()
-                    except Exception as e:
-                        # Fallback to simple decoding if PDF extraction fails
+                    else:
                         resume_content = file_bytes.decode('utf-8', errors='ignore')
-                        print(f"PDF extraction error: {str(e)}")
-                else:
-                    # For non-PDF files, use simple decoding
-                    resume_content = file_bytes.decode('utf-8', errors='ignore')
-                
-                # Store resume in MongoDB
-                resume_id = db.resumes.insert_one({
-                    'filename': resume_file.name,
-                    'content': resume_content,
-                    'job_description_id': selected_jd_id,
-                    'user_id': str(request.user['_id']),  # Associate with current user
-                    'uploaded_at': datetime.datetime.now()
-                }).inserted_id
-                
-                
-                # Analyze using ATS with detailed error tracking
-                try:
-                    print(f"Starting ATS analysis for {resume_file.name}...")
-                    ats = ATS()
                     
-                    print("Loading resume...")
-                    ats.load_resume(resume_content)
+                    # Store resume in MongoDB
+                    resume_id = db.resumes.insert_one({
+                        'filename': resume_file.name,
+                        'content': resume_content,
+                        'job_description_id': selected_jd_id,
+                        'user_id': str(request.user['_id']),
+                        'uploaded_at': datetime.datetime.now()
+                    }).inserted_id
                     
-                    print("Loading job description...")
-                    ats.load_job_description(job_description['content'])
+                    # Generate AI analysis
+                    input_prompt = get_resume_report_text_prompts(resume_content)
+                    ai_report = generate_and_get_resume_report(input_prompt)
                     
-                    print("Extracting experience...")
-                    experience = ats.extract_experience()
+                    # Extract score from AI report
+                    score_match = re.search(r'(\d{1,3})%', ai_report)
+                    similarity_score = float(score_match.group(1)) if score_match else 65.0
                     
-                    print("Cleaning experience...")
-                    ats.clean_experience(experience)
+                    # Extract skills and experience sections from AI report
+                    skills_section = ""
+                    experience_section = ""
+                    is_fresher = False
                     
-                    print("Extracting skills...")
-                    skills = " ".join(ats.extract_skills())
+                    # Parse AI report sections
+                    sections = ai_report.split('\n\n')
+                    for section in sections:
+                        if 'skills' in section.lower():
+                            skills_section = section
+                        elif 'experience' in section.lower():
+                            experience_section = section
+                            # Check if candidate is a fresher
+                            is_fresher = any(keyword in section.lower() for keyword in 
+                                ['fresher', 'entry level', 'recent graduate', 'no experience'])
                     
-                    print("Cleaning skills...")
-                    ats.clean_skills(skills)
-                    
-                    print("Computing similarity score...")
-                    similarity_score = ats.compute_similarity()
-                    print(f"Analysis complete. Similarity score: {similarity_score}")
-                    
-                    # Store results in MongoDB
+                    # Store analysis results
                     result_id = db.analysis_results.insert_one({
                         'resume_id': str(resume_id),
                         'job_description_id': selected_jd_id,
-                        'user_id': str(request.user['_id']),  # Associate with current user
-                        'similarity_score': float(similarity_score.item() * 100),
-                        'extracted_skills': skills,
-                        'extracted_experience': experience,
+                        'user_id': str(request.user['_id']),
+                        'similarity_score': similarity_score,
+                        'extracted_skills': skills_section,
+                        'extracted_experience': experience_section,
+                        'is_fresher': is_fresher,
+                        'ai_report': ai_report,
                         'created_at': datetime.datetime.now(),
-                        'filename': resume_file.name  # Add filename for easier identification
+                        'filename': resume_file.name
                     }).inserted_id
                     
                     result_ids.append(str(result_id))
                     
-                except Exception as ats_error:
-                    print(f"ATS Analysis error for {resume_file.name}: {str(ats_error)}")
-                    messages.error(request, f"Error analyzing {resume_file.name}: {str(ats_error)}")
+                except Exception as analysis_error:
+                    print(f"Analysis error for {resume_file.name}: {str(analysis_error)}")
+                    messages.error(request, f"Error analyzing {resume_file.name}: {str(analysis_error)}")
             
-            # If no results were successfully processed
+            # Handle results
             if not result_ids:
                 messages.error(request, "No resumes were successfully analyzed.")
                 return render(request, 'resume_analyzer/upload_resume.html', {
                     'job_descriptions': job_descriptions
                 })
             
-            # If only one result, redirect to single result page
+            # Redirect based on number of results
             if len(result_ids) == 1:
                 return redirect('analysis_result', result_id=result_ids[0])
-            
-            # For multiple results, redirect to bulk results page
             return redirect('bulk_analysis_results', result_ids=','.join(result_ids))
             
         except Exception as e:
